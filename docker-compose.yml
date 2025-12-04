@@ -1,0 +1,59 @@
+
+services:
+  mongo:
+    image: mongo:5
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app_net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    networks:
+      - app_net
+
+  user_service:
+    build: ./user_service
+    container_name: user_service
+    ports:
+      - "3030:3030"
+    depends_on:
+      - mongo
+    networks:
+      - app_net
+
+
+  task_service:
+    build: ./task_service
+    container_name: task_service
+    ports:
+      - "3031:3031"
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app_net
+  notification_service:
+    build: ./notification_service
+    container_name: notification_service
+    ports:
+      - "3032:3032"
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app_net
+volumes:
+  mongo_data:
+
+networks:
+  app_net:
+    driver: bridge
